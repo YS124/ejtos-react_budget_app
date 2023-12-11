@@ -1,48 +1,38 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 
 const Budget = () => {
-  const { budget, expenses } = useContext(AppContext);
-  const [newBudget, setNewBudget] = useState(budget);
-  const [error, setError] = useState('');
-  const totalExpenses = expenses.reduce((total, item) => total += item.cost, 0);
-  const minimumSpending = 0; // Define minimum spending threshold
-  const max = 20000;
-  const handleBudgetChange = (event) => {
-    const value = event.target.value;
-    if (!/^\d+$/.test(value)) {
-      setError('Please enter a valid number.');
-      return;
-    }
+	const { budget, dispatch,expenses, currency } = useContext(AppContext);
 
-    const parsedValue = parseInt(value);
+	const changeBudget = (val)=>{
+		const totalExpenses = expenses.reduce((total, item) => {
+			return (total += item.cost);
+		}, 0);
 
-    if (parsedValue > max) {
-        alert(`Budget cannot exceed ${max}`);
-        return;}
+		
+		if(val<totalExpenses) {
+			alert("You cannot reduce the budget that is already allocated!");
+		} 
 
-
-    if (parsedValue < minimumSpending + totalExpenses) {
-      alert(`Budget cannot be less than £${minimumSpending + totalExpenses} due to minimum spending requirement.`);
-      return;
-    }
-
-    setNewBudget(parsedValue);
-    setError('');
-  };
-
-  return (
-    <div className='alert alert-secondary'>
-      {newBudget && <span>Budget: £{newBudget}</span>}
-      <input
-        type="number"
-        step="10"
-        value={newBudget}
-        onChange={handleBudgetChange}
-      />
-      {error && <span className='text-danger'>{error}</span>}
-    </div>
-  );
+        else if (val>20000){
+            alert("The budget can't exceed 20000!");
+        }
+        
+        
+        else {
+			dispatch({
+				type: 'SET_BUDGET',
+				payload: val,
+			})
+			}
+	}
+	
+	return (
+		<div className='alert alert-secondary'>
+            <span>Budget: {currency}</span>
+			<input type="number" step="10" value={budget} onInput={(event)=>changeBudget(event.target.value)}></input>
+		</div>
+	);
 };
 
 export default Budget;
